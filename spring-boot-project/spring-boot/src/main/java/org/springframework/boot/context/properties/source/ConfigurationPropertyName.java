@@ -304,24 +304,27 @@ public final class ConfigurationPropertyName
 	}
 
 	private String toString(CharSequence[] elements) {
-		StringBuilder result = new StringBuilder();
-		for (CharSequence element : elements) {
-			boolean indexed = isIndexed(element);
-			if (result.length() > 0 && !indexed) {
-				result.append(".");
-			}
-			if (indexed) {
-				result.append(element);
-			}
-			else {
-				for (int i = 0; i < element.length(); i++) {
-					char ch = Character.toLowerCase(element.charAt(i));
-					result.append(ch != '_' ? ch : "");
-				}
-			}
-		}
-		return result.toString();
-	}
+        int assumedAverageElementLength = 8;
+        // initial capacity computed to avoid frequent throwing away of StringBuilder's
+        // char arrays during rapid doubling of arrays in order to satisfy capacity demands.
+        StringBuilder result = new StringBuilder(elements.length * assumedAverageElementLength);
+        for (CharSequence element : elements) {
+            if (isIndexed(element)) {
+                result.append(element);
+            } else {
+                if (result.length() > 0) {
+                    result.append('.');
+                }
+                for (int i = 0; i < element.length(); i++) {
+                    char ch = element.charAt(i);
+                    if (ch != '_') {
+                        result.append(Character.toLowerCase(ch));
+                    }
+                }
+            }
+        }
+        return result.toString();
+    }
 
 	@Override
 	public int hashCode() {
